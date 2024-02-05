@@ -42,3 +42,15 @@ impl CacheStorate {
         }
     }
 }
+
+impl Drop for CacheStorate {
+    fn drop(&mut self) {
+        match fs::remove_dir_all(format!("lua-cache/{}", self.key)) {
+            Ok(_) => {}
+            Err(e) => {
+                println!("Failed to remove CacheStorage with id: {}", self.key);
+                println!("Error: {}", e);
+            }
+        }
+    }
+}
