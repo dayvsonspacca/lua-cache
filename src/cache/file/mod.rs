@@ -1,6 +1,7 @@
 use std::{
     collections::HashMap,
-    fs,
+    fs::{self, File},
+    io::Write,
     time::{Duration, SystemTime},
 };
 
@@ -23,6 +24,21 @@ impl CacheStorate {
                 data: HashMap::new(),
             },
             Err(e) => panic!("{}", e),
+        }
+    }
+
+    pub fn add(&mut self, key: &str, value: &str) {
+        self.data
+            .insert(key.to_string(), SystemTime::now() + self.ttl);
+
+        let mut file = match File::create(format!("lua-cache/{}/{}", self.key, key)) {
+            Ok(file) => file,
+            Err(e) => panic!("Failed to create cache file: {}", e),
+        };
+
+        match file.write_all(value.as_bytes()) {
+            Ok(_) => {}
+            Err(e) => panic!("Failed to write in cache file: {}", e),
         }
     }
 }
