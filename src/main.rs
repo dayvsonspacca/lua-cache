@@ -7,4 +7,6 @@ fn main() {
     let mut cache = CacheStorate::new(Duration::from_secs(60));
     cache.add("car", "white");
     cache.add("city", "new-york");
+    
+    println!("{}", cache.get("car"));
 }
