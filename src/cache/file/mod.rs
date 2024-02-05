@@ -42,7 +42,7 @@ impl CacheStorate {
         }
     }
 
-    pub fn get(&self, key: &str) -> String {
+    pub fn get(&mut self, key: &str) -> String {
         if let Some(expiration_time) = self.data.get(key) {
             if SystemTime::now() < *expiration_time {
                 if let Ok(mut file) = File::open(format!("lua-cache/{}/{}", self.key, key)) {
@@ -56,19 +56,29 @@ impl CacheStorate {
                     println!("Failed to locate cache with key: {}", key);
                 }
             }
+            self.invalidate(key);
         }
         String::new()
     }
+
+    fn invalidate(&mut self, key: &str) {
+        self.data.remove(key);
+
+        match fs::remove_file(format!("lua-cache/{}/{}", self.key, key)) {
+            Ok(_) => {}
+            Err(e) => eprintln!("Error invaliting cache: {}", e),
+        }
+    }
 }
 
-// impl Drop for CacheStorate {
-//     fn drop(&mut self) {
-//         match fs::remove_dir_all(format!("lua-cache/{}", self.key)) {
-//             Ok(_) => {}
-//             Err(e) => {
-//                 println!("Failed to remove CacheStorage with id: {}", self.key);
-//                 println!("Error: {}", e);
-//             }
-//         }
-//     }
-// }
+impl Drop for CacheStorate {
+    fn drop(&mut self) {
+        match fs::remove_dir_all(format!("lua-cache/{}", self.key)) {
+            Ok(_) => {}
+            Err(e) => {
+                println!("Failed to remove CacheStorage with id: {}", self.key);
+                println!("Error: {}", e);
+            }
+        }
+    }
+}
