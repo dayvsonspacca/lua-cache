@@ -7,18 +7,18 @@ use std::{
 
 use rand::Rng;
 
-pub struct CacheStorage {
+pub struct FileStorage {
     key: String,
     ttl: Duration,
     data: HashMap<String, SystemTime>,
 }
 
-impl CacheStorage {
-    pub fn new(ttl: Duration) -> CacheStorage {
+impl FileStorage {
+    pub fn new(ttl: Duration) -> FileStorage {
         let key = rand::thread_rng().gen::<u64>().to_string();
 
         match fs::create_dir_all(format!("lua-cache/{}", key)) {
-            Ok(_) => CacheStorage {
+            Ok(_) => FileStorage {
                 key,
                 ttl,
                 data: HashMap::new(),
@@ -71,12 +71,12 @@ impl CacheStorage {
     }
 }
 
-impl Drop for CacheStorage {
+impl Drop for FileStorage {
     fn drop(&mut self) {
         match fs::remove_dir_all(format!("lua-cache/{}", self.key)) {
             Ok(_) => {}
             Err(e) => {
-                println!("Failed to remove CacheStorage with id: {}", self.key);
+                println!("Failed to remove FileStorage with id: {}", self.key);
                 println!("Error: {}", e);
             }
         }
