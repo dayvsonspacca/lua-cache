@@ -13,6 +13,7 @@ pub struct FileStorage {
     data: HashMap<String, SystemTime>,
 }
 
+#[allow(dead_code)]
 impl FileStorage {
     pub fn new(ttl: Duration) -> FileStorage {
         let key = rand::thread_rng().gen::<u64>().to_string();
